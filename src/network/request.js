@@ -10,8 +10,6 @@ export const request = (config)=> {
     })
 
     ins.interceptors.request.use(config => {
-        console.log(config);
-        
         return config
     })
     return ins(config)
