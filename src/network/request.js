@@ -10,6 +10,8 @@ export const request = (config)=> {
     })
 
     ins.interceptors.request.use(config => {
+        //给所有请求头加token
+        config.headers.Authorization = sessionStorage.getItem('token')
         return config
     })
     return ins(config)
