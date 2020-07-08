@@ -33,10 +33,10 @@
                         <el-button type="primary" size="mini" @click="editClick(scope.row)" icon="el-icon-edit"></el-button>                                                 
                      </el-tooltip>
                      <el-tooltip class="item" effect="dark" :enterable="false" content="删除" placement="top-start">
-                         <el-button type="danger" size="mini" icon="el-icon-delete"></el-button>
+                         <el-button type="danger" size="mini" icon="el-icon-delete" @click="delUser(scope.row.id)"></el-button>
                      </el-tooltip>
                      <el-tooltip class="item" effect="dark" :enterable="false" content="分配角色" placement="top-start">
-                         <el-button type="primary" size="mini" icon="el-icon-setting"></el-button>
+                         <el-button type="primary" size="mini" @click="allotRights(scope.row)" icon="el-icon-setting"></el-button>
                      </el-tooltip>
                 </template>               
             </el-table-column>
@@ -53,18 +53,20 @@
 
     <!-- 添加用户弹窗 -->
     <UserAddEdit ref="addOrEditDialog" @updateUserList="updateUserList" :userinfo="userinfo"></UserAddEdit>
-
+    <!-- 分配角色弹窗 -->
+    <UserAllotRights ref="allotRights" :allotUser="allotUser" :roleList="roleList" @updateUserList="updateUserList"></UserAllotRights>
  </div>
 </template>
 
 <script>
 import BreadcrumdNav from "components/BreadcrumdNav.vue"
-import {reqUserList,reqUpdatestate} from "network/api.js"
+import {reqUserList,reqUpdatestate,reqdelUser,reqRoleList} from "network/api.js"
 import UserAddEdit from "./childComp/UserAddEdit"
+import UserAllotRights from "./childComp/UserAllotRights"
  export default {
   name: 'Users',
   components:{
-      BreadcrumdNav,UserAddEdit
+      BreadcrumdNav,UserAddEdit,UserAllotRights
   },
   data () {
    return {
@@ -75,7 +77,9 @@ import UserAddEdit from "./childComp/UserAddEdit"
               pagesize:2
           },//用户列表请求参数
           total:0,//总条数
-          userinfo:{}
+          userinfo:{},
+          allotUser:{},//分配角色信息
+          roleList:[],//角色列表数组
     }
   },
   created(){
@@ -133,6 +137,37 @@ import UserAddEdit from "./childComp/UserAddEdit"
       //更新用户信息
       updateUserList(){
           this.getUserList()
+      },
+      //删除用户信息
+      delUser(id){
+
+         
+
+         this.$confirm('确定要删除吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+            const result = await reqdelUser(id)
+            if(result.meta.status !== 200) return this.$message.error(result.meta.msg)
+            this.$message.success('删除成功')
+            this.getUserList() 
+        }).catch(() => {
+            this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });      
+        });
+          
+      },
+      //点击分配权限
+      async allotRights(userinfo){
+          this.allotUser = userinfo
+          this.$refs.allotRights.dialogVisible = true
+          const result = await reqRoleList()
+          if(result.meta.status !== 200) return this.$message.error('获取角色列表失败')
+          this.roleList = result.data
+          
       }
   }
  }
