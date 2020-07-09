@@ -32,3 +32,9 @@ export const reqRightsList = () => request({url:'rights/list',method:'get'})
 
 //删除指定的权限
 export const reqDelRights = (roleId,rightId) => request({url:`roles/${roleId}/rights/${rightId}`,method:'delete'})
+
+//获取树状权限列表
+export const reqRightsTreeList = () => request({url:'rights/tree',method:'get'})
+
+//角色授权
+export const reqRoleRights = (roleId,rids) => request({url:`roles/${roleId}/rights`,method:'post',data:{rids}})
